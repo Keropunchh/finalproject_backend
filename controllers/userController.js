@@ -38,6 +38,41 @@ exports.register = async(req,res,next) => {
  }
 }
 
+exports.registermember = async(req,res,next) => {
+  try{
+    const { name, email, password} = req.body
+    
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+      const error = new Error("ข้อมูลที่ได้รับไม่ถูกต้อง")
+      error.statusCode = 422;   
+      error.validation = errors.array()
+      throw error;
+    }
+
+    const existEmail = await User.findOne({ email:email })
+    if(existEmail){
+      const error= new Error("อีเมลนี้มีผู้ใช้งานในระบบแล้ว")
+      error.statusCode = 400
+      throw error;
+    }
+    const role = "member";
+
+    let user = new User();
+    user.name = name
+    user.email = email
+    user.password = await user.encryptPassword(password)
+    user.role = role;
+  
+    await user.save();
+    
+    res.status(201).json({
+      message:"ลงทะเบียนเรียบร้อยแล้ว"
+    })
+  }catch (error){
+    next(error)
+ }
+}
 exports.login = async(req,res,next) => {
   try{
     const {email, password} = req.body

@@ -9,9 +9,16 @@ router.post('/',[
     passportJWT.isLogin,checkAdmin.isAdmin,
     body('name').not().isEmpty().withMessage("กรุณาป้อนชื่อสกุลด้วย"),
     body('email').not().isEmpty().withMessage("กรุณาป้อนอีเมลด้วย").isEmail().withMessage("รูปแบบอีเมลไม่ถูกต้อง"),
+    body('password').not().isEmpty().withMessage("กรุณากรอกรหัสผ่านด้วย").isLength({ min: 5 }).withMessage("รหัสผ่านต้อง 5 ตัวอักษรขึ้นไป")
+],userController.register)
+
+router.post('/member',[
+    passportJWT.isLogin,
+    body('name').not().isEmpty().withMessage("กรุณาป้อนชื่อสกุลด้วย"),
+    body('email').not().isEmpty().withMessage("กรุณาป้อนอีเมลด้วย").isEmail().withMessage("รูปแบบอีเมลไม่ถูกต้อง"),
     body('password').not().isEmpty().withMessage("กรุณากรอกรหัสผ่านด้วย").isLength({ min: 5 }).withMessage("รหัสผ่านต้อง 5 ตัวอักษรขึ้นไป"),
     body('role').not().isEmpty().withMessage("กรุณาป้อนตำแหน่งด้วย")
-],userController.register)
+],userController.registermember)
 
 router.post('/login',[
     body('email').not().isEmpty().withMessage("กรุณาป้อนอีเมลด้วย").isEmail().withMessage("รูปแบบอีเมลไม่ถูกต้อง"),

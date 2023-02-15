@@ -6,7 +6,7 @@ const userSchema = new Schema({
     name : { type:String, require:true, trim:true},
     email : { type:String, require:true, trim:true, unique:true, index:true},
     password: {type:String, require:true, trime:true, minlenght: 5},
-    role: {type:String, default: 'manager' }
+    role: {type:String, default: 'member' }
   },{collection:"users"});
 
 userSchema.methods.encryptPassword = async function(password){
