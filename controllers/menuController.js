@@ -77,6 +77,14 @@ exports.insert = async (req, res, next) => {
 exports.destroy = async (req, res, next) => {
   try {
     const { id } = req.params;
+    
+    const menu1 = await Menu.findOne({
+      _id: id,
+    });
+    var pic = menu1.photo
+    const projectPath = path.resolve("./");
+    const uploadPath = `${projectPath}/public/images/`;
+    fs.unlinkSync(uploadPath + pic)
 
     const menu = await Menu.deleteOne({
       _id: id,
@@ -99,8 +107,15 @@ exports.destroy = async (req, res, next) => {
 exports.update = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, photo ,price } = req.body;
-    
+    const { name, photo , price } = req.body;
+    const menu1 = await Menu.findOne({
+      _id: id,
+    });
+    var pic = menu1.photo
+    const projectPath = path.resolve("./");
+    const uploadPath = `${projectPath}/public/images/`;
+    fs.unlinkSync(uploadPath + pic)
+
     if(photo === ''){
       const menu = await Menu.updateOne(
         { _id: id },
@@ -159,7 +174,7 @@ async function saveImageToDisk(baseImage) {
   await writeFileAsync(uploadPath + filename, image.data, "base64");
   //return ชื่อไฟล์ใหม่ออกไป
   return filename;
-}
+};
 
 function decodeBase64Image(base64Str) {
   var matches = base64Str.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
@@ -172,4 +187,4 @@ function decodeBase64Image(base64Str) {
   image.data = matches[2];
 
   return image;
-}
+};

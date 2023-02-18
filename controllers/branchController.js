@@ -8,42 +8,6 @@ const uuidv4 = require("uuid");
 const { promisify } = require("util");
 const writeFileAsync = promisify(fs.writeFile);
 
-exports.index = async (req, res, next) => {
-  const branch = await Branch.find()
-    .select("name photo location")
-    .sort({ _id: -1 });
-
-  const branchWithPhotoDomain = branch.map((branch, index) => {
-    return {
-      id: branch._id,
-      name: branch.name,
-      photo: config.DOMAIN + branch.photo,
-      location: branch.location,
-    };
-  });
-
-  res.status(200).json({
-    data: branchWithPhotoDomain,
-  });
-};
-
-exports.staff = async (req, res, next) => {
-  const staff = await Staff.find().populate("branch");
-  res.status(200).json({
-    data: staff,
-  });
-};
-
-exports.show = async (req, res, next) => {
-  const { id } = req.params;
-  const branch = await Branch.findOne({
-    _id: id,
-  }).populate("staffs");
-  res.status(200).json({
-    data: branch,
-  });
-};
-
 exports.insert = async (req, res, next) => {
   try{
     const { name, location, photo } = req.body;
@@ -55,7 +19,6 @@ exports.insert = async (req, res, next) => {
       error.validation = errors.array()
       throw error;
     }
-
 
     let branch = new Branch({
       name: name,
@@ -83,7 +46,6 @@ exports.insertstaff = async (req, res, next) => {
         throw error;
       }
   
-  
       let staff = new Staff({
         name: name,
         salary: salary,
@@ -98,7 +60,182 @@ exports.insertstaff = async (req, res, next) => {
       });
     }catch (error){
       next(error)
-  }};
+}};
+
+exports.index = async (req, res, next) => {
+  const branch = await Branch.find()
+    .select("name photo location")
+    .sort({ _id: -1 });
+
+  const branchWithPhotoDomain = branch.map((branch, index) => {
+    return {
+      id: branch._id,
+      name: branch.name,
+      photo: config.DOMAIN + branch.photo,
+      location: branch.location,
+    };
+  });
+
+  res.status(200).json({
+    data: branchWithPhotoDomain,
+  });
+};
+
+exports.staff = async (req, res, next) => {
+  const staff = await Staff.find().populate("branchs");
+  res.status(200).json({
+    data: staff,
+  });
+};
+
+exports.show = async (req, res, next) => {
+  const { id } = req.params;
+  const branch = await Branch.findOne({
+    _id: id,
+  }).populate("staffs");
+  res.status(200).json({
+    data: branch,
+  });
+};
+
+exports.showstaff = async (req, res, next) => {
+  const { id } = req.params;
+  const staff = await Staff.findOne({
+    _id: id,
+  }).populate("branchs");
+  res.status(200).json({
+    data: staff,
+  });
+};
+
+exports.update = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { name, location, photo } = req.body;
+    const branch1 = await Branch.findOne({
+      _id: id,
+    });
+
+    var pic = branch1.photo
+    const projectPath = path.resolve("./");
+    const uploadPath = `${projectPath}/public/images/`;
+    fs.unlinkSync(uploadPath + pic)
+
+    const branch = await Branch.updateOne(
+      { _id: id },
+      {
+        name: name,
+        location: location,
+        photo: await saveImageToDisk(photo),
+      }
+    );
+    
+    res.status(200).json({
+      message: "เพิ่มข้อมูลเรียบร้อย",
+    });
+  } catch (error) {
+    error = new Error("เกิดข้อผิดพลาด: " + error.message)
+    error.statusCode = 402
+    next(error)
+  }
+};
+
+exports.updatestaff = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { name, salary, tel , photo , branch } = req.body;
+    const staff1 = await Staff.findOne({
+      _id: id,
+    });
+    
+    var pic = staff1.photo
+    const projectPath = path.resolve("./");
+    const uploadPath = `${projectPath}/public/images/`;
+    fs.unlinkSync(uploadPath + pic)
+    
+    const staff = await Staff.updateOne(
+      { _id: id },
+      {
+        name: name,
+        salary: salary,
+        tel: tel,
+        branch: branch,
+        photo: await saveImageToDisk(photo)
+      }
+    );
+    
+
+    res.status(200).json({
+      message: "เพิ่มข้อมูลเรียบร้อย",
+    });
+  } catch (error) {
+    error = new Error("เกิดข้อผิดพลาด: " + error.message)
+    error.statusCode = 402
+    next(error)
+  }
+};
+
+exports.destroy = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const branch1 = await Branch.findOne({
+      _id: id,
+    });
+
+    var pic = branch1.photo
+    const projectPath = path.resolve("./");
+    const uploadPath = `${projectPath}/public/images/`;
+    fs.unlinkSync(uploadPath + pic)
+
+    const branch = await Branch.deleteOne({
+      _id: id,
+    });
+
+    if (branch.deletedCount === 0) {
+      const error= new Error("ไม่สามารถลบข้อมูลได้ / ไม่พบเมนู")
+      error.statusCode = 401
+      throw error;
+    } else {
+      res.status(200).json({
+        message: "ลบข้อมูลเรียบร้อย",
+      });
+    }
+  } catch (error) {
+    next(error)
+  }
+};
+
+exports.destroystaff = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    
+    const staff1 = await Staff.findOne({
+      _id: id,
+    });
+    
+    var pic = staff1.photo
+    const projectPath = path.resolve("./");
+    const uploadPath = `${projectPath}/public/images/`;
+    fs.unlinkSync(uploadPath + pic)
+
+    const staff = await Staff.deleteOne({
+      _id: id,
+    });
+
+    if (staff.deletedCount === 0) {
+      const error= new Error("ไม่สามารถลบข้อมูลได้ / ไม่พบเมนู")
+      error.statusCode = 401
+      throw error;
+    } else {
+      res.status(200).json({
+        message: "ลบข้อมูลเรียบร้อย",
+      });
+    }
+  } catch (error) {
+    next(error)
+  }
+};
 
 async function saveImageToDisk(baseImage) {
   //หา path จริงของโปรเจค
@@ -127,7 +264,7 @@ async function saveImageToDisk(baseImage) {
   await writeFileAsync(uploadPath + filename, image.data, "base64");
   //return ชื่อไฟล์ใหม่ออกไป
   return filename;
-}
+};
 
 function decodeBase64Image(base64Str) {
   var matches = base64Str.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
@@ -140,4 +277,4 @@ function decodeBase64Image(base64Str) {
   image.data = matches[2];
 
   return image;
-}
+};
