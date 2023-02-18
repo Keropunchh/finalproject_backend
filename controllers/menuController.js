@@ -29,16 +29,26 @@ exports.index = async (req, res, next) => {
 exports.show = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const menu = await Menu.findOne({
+    const menu = await Menu.find({
       _id: id,
     });
+
+    const menuWithPhotoDomain = menu.map((menu, index) => {
+      return {
+        id: menu._id,
+        name: menu.name,
+        photo: config.DOMAIN + "images/" + menu.photo,
+        price: menu.price,
+      };
+    });
+
     if (!menu) {
       const error = new Error("ไม่พบเมนู")
       error.statusCode = 400
       throw error;
     } else {
       res.status(200).json({
-        data: menu,
+        data: menuWithPhotoDomain,
       });
     }
   } catch (error) {
@@ -116,27 +126,15 @@ exports.update = async (req, res, next) => {
     const uploadPath = `${projectPath}/public/images/`;
     fs.unlinkSync(uploadPath + pic)
 
-    if(photo === ''){
-      const menu = await Menu.updateOne(
-        { _id: id },
-        {
-          name: name,
-          photo: "nopic.png",
-          price: price,
-        }
-      );
-    }
-    else{
-      const menu = await Menu.updateOne(
-        { _id: id },
-        {
-          name: name,
-          photo: await saveImageToDisk(photo),
-          price: price,
-        }
-      );
-    }
-
+    const menu = await Menu.updateOne(
+      { _id: id },
+      {
+        name: name,
+        photo: await saveImageToDisk(photo),
+        price: price,
+      }
+    );
+    
     res.status(200).json({
       message: "เพิ่มข้อมูลเรียบร้อย",
     });

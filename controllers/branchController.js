@@ -71,7 +71,7 @@ exports.index = async (req, res, next) => {
     return {
       id: branch._id,
       name: branch.name,
-      photo: config.DOMAIN + branch.photo,
+      photo: config.DOMAIN + "images/" + branch.photo,
       location: branch.location,
     };
   });
@@ -83,16 +83,27 @@ exports.index = async (req, res, next) => {
 
 exports.staff = async (req, res, next) => {
   const staff = await Staff.find().populate("branchs");
+  const staffWithPhotoDomain = staff.map((staff, index) => {
+    return {
+      id: staff._id,
+      name: staff.name,
+      photo: config.DOMAIN + "images/" + staff.photo,
+      salary: staff.salary,
+      tel: staff.tel,
+      branch: staff.branch
+    };
+  });
   res.status(200).json({
-    data: staff,
+    data: staffWithPhotoDomain,
   });
 };
 
 exports.show = async (req, res, next) => {
   const { id } = req.params;
-  const branch = await Branch.findOne({
+  const branch = await Branch.find({
     _id: id,
   }).populate("staffs");
+  
   res.status(200).json({
     data: branch,
   });
@@ -100,11 +111,21 @@ exports.show = async (req, res, next) => {
 
 exports.showstaff = async (req, res, next) => {
   const { id } = req.params;
-  const staff = await Staff.findOne({
+  const staff = await Staff.find({
     _id: id,
   }).populate("branchs");
+  const staffWithPhotoDomain = staff.map((staff, index) => {
+    return {
+      id: staff._id,
+      name: staff.name,
+      photo: config.DOMAIN + "images/" + staff.photo,
+      salary: staff.salary,
+      tel: staff.tel,
+      branch: staff.branch
+    };
+  });
   res.status(200).json({
-    data: staff,
+    data: staffWithPhotoDomain,
   });
 };
 
@@ -209,7 +230,7 @@ exports.destroy = async (req, res, next) => {
 exports.destroystaff = async (req, res, next) => {
   try {
     const { id } = req.params;
-    
+
     const staff1 = await Staff.findOne({
       _id: id,
     });
