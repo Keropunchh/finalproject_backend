@@ -5,6 +5,7 @@ var logger = require('morgan');
 const mongoose = require('mongoose')
 const passport = require('passport')
 
+var indexRouter = require('./routes/index');
 var branchsRouter = require('./routes/branch');
 var menuRouter = require('./routes/menu');
 var usersRouter = require('./routes/user');
@@ -26,6 +27,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(passport.initialize());
 
+app.use('/', indexRouter);
 app.use('/branch', branchsRouter);
 app.use('/user', usersRouter);
 app.use('/menu', menuRouter);
