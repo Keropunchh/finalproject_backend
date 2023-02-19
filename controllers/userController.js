@@ -21,7 +21,7 @@ exports.register = async(req,res,next) => {
       error.statusCode = 400
       throw error;
     }
-    
+
     let user = new User();
     user.name = name
     user.email = email
@@ -85,10 +85,7 @@ exports.login = async(req,res,next) => {
 };
 
 exports.index = async(req,res,next) => {
-  const role = "admin";
-  const user = await User.findOne({
-    role: role,
-  });
+  const user = await User.find();
 
   res.status(200).json({
     data: user,
