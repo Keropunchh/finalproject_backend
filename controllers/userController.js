@@ -3,9 +3,9 @@ const { validationResult } = require('express-validator')
 const jwt = require("jsonwebtoken");
 const config = require('../config/index');
 
-exports.registeradmin = async(req,res,next) => {
+exports.register = async(req,res,next) => {
   try{
-    const { name, email, password} = req.body
+    const { name, email, password, role} = req.body
     
     const errors = validationResult(req);
     if(!errors.isEmpty()){
@@ -21,116 +21,7 @@ exports.registeradmin = async(req,res,next) => {
       error.statusCode = 400
       throw error;
     }
-    const role = "admin";
-
-    let user = new User();
-    user.name = name
-    user.email = email
-    user.password = await user.encryptPassword(password)
-    user.role = role;
-  
-    await user.save();
     
-    res.status(201).json({
-      message:"ลงทะเบียนเรียบร้อยแล้ว"
-    })
-  }catch (error){
-    next(error)
- }
-};
-
-exports.registermanager = async(req,res,next) => {
-  try{
-    const { name, email, password} = req.body
-    
-    const errors = validationResult(req);
-    if(!errors.isEmpty()){
-      const error = new Error("ข้อมูลที่ได้รับไม่ถูกต้อง")
-      error.statusCode = 422;   
-      error.validation = errors.array()
-      throw error;
-    }
-
-    const existEmail = await User.findOne({ email:email })
-    if(existEmail){
-      const error= new Error("อีเมลนี้มีผู้ใช้งานในระบบแล้ว")
-      error.statusCode = 400
-      throw error;
-    }
-    const role = "manager";
-
-    let user = new User();
-    user.name = name
-    user.email = email
-    user.password = await user.encryptPassword(password)
-    user.role = role;
-  
-    await user.save();
-    
-    res.status(201).json({
-      message:"ลงทะเบียนเรียบร้อยแล้ว"
-    })
-  }catch (error){
-    next(error)
- }
-};
-
-exports.registerstaff = async(req,res,next) => {
-  try{
-    const { name, email, password} = req.body
-    
-    const errors = validationResult(req);
-    if(!errors.isEmpty()){
-      const error = new Error("ข้อมูลที่ได้รับไม่ถูกต้อง")
-      error.statusCode = 422;   
-      error.validation = errors.array()
-      throw error;
-    }
-
-    const existEmail = await User.findOne({ email:email })
-    if(existEmail){
-      const error= new Error("อีเมลนี้มีผู้ใช้งานในระบบแล้ว")
-      error.statusCode = 400
-      throw error;
-    }
-    const role = "staff";
-
-    let user = new User();
-    user.name = name
-    user.email = email
-    user.password = await user.encryptPassword(password)
-    user.role = role;
-  
-    await user.save();
-    
-    res.status(201).json({
-      message:"ลงทะเบียนเรียบร้อยแล้ว"
-    })
-  }catch (error){
-    next(error)
- }
-};
-
-exports.registermember = async(req,res,next) => {
-  try{
-    const { name, email, password} = req.body
-    
-    const errors = validationResult(req);
-    if(!errors.isEmpty()){
-      const error = new Error("ข้อมูลที่ได้รับไม่ถูกต้อง")
-      error.statusCode = 422;   
-      error.validation = errors.array()
-      throw error;
-    }
-
-    const existEmail = await User.findOne({ email:email })
-    if(existEmail){
-      const error= new Error("อีเมลนี้มีผู้ใช้งานในระบบแล้ว")
-      error.statusCode = 400
-      throw error;
-    }
-    const role = "member";
-
     let user = new User();
     user.name = name
     user.email = email
@@ -193,41 +84,8 @@ exports.login = async(req,res,next) => {
  }
 };
 
-exports.admin = async(req,res,next) => {
+exports.index = async(req,res,next) => {
   const role = "admin";
-  const user = await User.findOne({
-    role: role,
-  });
-
-  res.status(200).json({
-    data: user,
-  });
-};
-
-exports.manager = async(req,res,next) => {
-  const role = "manager";
-  const user = await User.findOne({
-    role: role,
-  });
-
-  res.status(200).json({
-    data: user,
-  });
-};
-
-exports.staff = async(req,res,next) => {
-  const role = "staff";
-  const user = await User.findOne({
-    role: role,
-  });
-
-  res.status(200).json({
-    data: user,
-  });
-};
-
-exports.member = async(req,res,next) => {
-  const role = "member";
   const user = await User.findOne({
     role: role,
   });
