@@ -10,7 +10,11 @@ const writeFileAsync = promisify(fs.writeFile);
 
 exports.insert = async (req, res, next) => {
   try{
-    const { name, location, photo } = req.body;
+    const { 
+      name, 
+      location: { lat , lgn } ,
+      photo 
+    } = req.body;
 
     const errors = validationResult(req);
     if(!errors.isEmpty()){
@@ -22,7 +26,10 @@ exports.insert = async (req, res, next) => {
 
     let branch = new Branch({
       name: name,
-      location: location,
+      location: {
+        lat : lat,
+        lgn : lgn,
+      },
       photo: await saveImageToDisk(photo)
     });
     await branch.save();
